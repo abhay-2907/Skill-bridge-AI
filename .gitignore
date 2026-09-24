@@ -1,0 +1,60 @@
+# Environment & Secrets
+.env
+*.env
+*.env.local
+backend/.env
+
+# Python & Virtual Environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+*.egg-info/
+.eggs/
+
+# Node & Dependencies
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build Outputs & Bundles
+dist/
+frontend/dist/
+build/
+.vite/
+frontend/.vite/
+
+# Databases & Local Storage
+*.db
+*.sqlite
+*.sqlite3
+backend/careerpilot.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/rag/vector_store/*
+!backend/rag/vector_store/.gitkeep
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
