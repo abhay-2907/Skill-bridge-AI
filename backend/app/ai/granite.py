@@ -287,21 +287,90 @@ class MockAIProvider(AIProvider):
 
 
 
+# ── Groq Open-Source LLM Provider (Llama 3.3 / Mixtral) ────────────────────────
+
+class GroqProvider(AIProvider):
+    """
+    Open-Source LLM Provider using Groq API (Llama-3.3-70b, Llama-3.1-8b, Mixtral).
+    Ultra-fast inference API with free tier access.
+    """
+
+    API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+    def __init__(self):
+        self.api_key = settings.GROQ_API_KEY
+        self.model = settings.GROQ_MODEL or "llama-3.3-70b-versatile"
+
+    def is_available(self) -> bool:
+        return bool(self.api_key and len(self.api_key.strip()) > 5)
+
+    async def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+        stop_sequences: Optional[list[str]] = None,
+    ) -> str:
+        if not self.is_available():
+            return "⚠️ GROQ_API_KEY is missing. Please set GROQ_API_KEY in your backend/.env file."
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key.strip()}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are SkillBridge AI, an expert software engineering career copilot and technical interview coach.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=45) as client:
+                response = await client.post(self.API_URL, json=payload, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    choices = data.get("choices", [])
+                    if choices:
+                        return choices[0].get("message", {}).get("content", "").strip()
+                    return "No output received from Open Source Groq model."
+                else:
+                    logger.error(f"Groq API error {response.status_code}: {response.text}")
+                    return f"⚠️ Groq API Error ({response.status_code}): {response.text}"
+        except Exception as e:
+            logger.error(f"Groq request failed: {e}")
+            return f"⚠️ Failed to connect to Groq Open-Source API: {e}"
+
+
 # ── Provider Factory ──────────────────────────────────────────────────────────
 
 def get_ai_provider() -> AIProvider:
     """
-    Factory function. Returns the appropriate AI provider based on configuration.
-    Automatically falls back to MockAIProvider if Granite is not configured.
+    Factory function. Selects the appropriate AI provider:
+    1. Groq (Open-Source Llama-3.3-70b / Mixtral) if GROQ_API_KEY is set
+    2. IBM Granite if WATSONX_API_KEY is set
+    3. MockAIProvider fallback for offline development
     """
-    provider = GraniteProvider()
-    if provider.is_available():
+    groq = GroqProvider()
+    if groq.is_available():
+        logger.info(f"Using Open-Source Groq provider (model: {settings.GROQ_MODEL})")
+        return groq
+
+    granite = GraniteProvider()
+    if granite.is_available():
         logger.info(f"Using IBM Granite provider (model: {settings.WATSONX_MODEL_ID})")
-        return provider
-    else:
-        logger.warning("IBM Granite not configured. Using MockAIProvider for development.")
-        return MockAIProvider()
+        return granite
+
+    logger.warning("No live AI API keys found. Using MockAIProvider for development.")
+    return MockAIProvider()
 
 
 # Singleton
 ai_provider = get_ai_provider()
+

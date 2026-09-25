@@ -1,4 +1,4 @@
-# CareerPilot AI — Comprehensive Documentation & Guide
+# CareerPilo AI — Comprehensive Documentation & Guide
 
 > **Tagline:** Understand your skills. Find your gaps. Prepare smarter.
 

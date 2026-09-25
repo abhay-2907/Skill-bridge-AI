@@ -45,11 +45,16 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "uploads"
 
     # ── IBM watsonx.ai ────────────────────────────────────────────────────
-    # Get these from: https://cloud.ibm.com/
     WATSONX_API_KEY: Optional[str] = None
     WATSONX_PROJECT_ID: Optional[str] = None
     WATSONX_URL: str = "https://us-south.ml.cloud.ibm.com"
     WATSONX_MODEL_ID: str = "ibm/granite-3-8b-instruct"
+
+    # ── Open-Source Models (Groq / HuggingFace / Ollama) ─────────────────
+    GROQ_API_KEY: Optional[str] = None
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    HUGGINGFACE_API_KEY: Optional[str] = None
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
 
     # ── Embeddings ────────────────────────────────────────────────────────
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
